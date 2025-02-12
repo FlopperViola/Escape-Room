@@ -5,33 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lucchetto della Prigione</title>
     <style>
-        /* Stile generale */
         body {
             font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #444;
+            background-color: #808080;
             margin: 0;
             flex-direction: column;
             text-align: center;
-            transition: background 0.5s;
         }
 
-        /* Cambio colore nella pagina finale */
-        .final-bg { background-color: #bbb; }
-
-        /* Contenitore principale */
+        /* Sfondi */
         .container {
             display: none;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.8);
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
             text-align: center;
-            width: 90%;
-            max-width: 400px;
         }
 
         .visible { display: block; }
@@ -46,7 +39,7 @@
         }
 
         .lock-body {
-            width: 100px;
+            width: 150px;
             height: 120px;
             background: #333;
             border-radius: 10px;
@@ -118,21 +111,23 @@
             text-align: center;
         }
 
-        /* Messaggio di transizione */
-        .transition-message {
-            font-size: 24px;
+        /* Messaggio transizione */
+        #transition1, #transition2 {
+            font-size: 20px;
             font-weight: bold;
-            color: #000;
-            text-align: center;
-            display: none;
+            color: #28a745;
         }
 
-        /* Media queries per dispositivi mobili */
-        @media (max-width: 600px) {
-            .lock-body { width: 80px; height: 100px; }
-            .rotor { width: 30px; height: 40px; font-size: 24px; }
-            .button { font-size: 16px; padding: 8px 15px; }
-            .container { max-width: 300px; }
+        #congrats {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
@@ -140,7 +135,7 @@
 
     <!-- PRIMA SFIDA: Lucchetto 963 -->
     <div id="lock1" class="container visible">
-        <h2>🔒 Inserisci il codice per sbloccare</h2>
+        <h2>🔒Inserisci il codice per sbloccare🔒</h2>
         <div class="lock">
             <div class="lock-shackle"></div>
             <div class="lock-body">
@@ -154,8 +149,10 @@
         <button class="button" onclick="checkCode(1, '963')">Sblocca</button>
     </div>
 
-    <!-- MESSAGGIO TRANSIZIONE -->
-    <div id="transition1" class="transition-message">✔ Complimenti! Ora verrai indirizzato alla seconda sfida...</div>
+    <!-- MESSAGGIO DI TRANSIZIONE PRIMA SFIDA -->
+    <div id="transition1" class="container">
+        <h2>Complimenti, hai superato la prima sfida! Ora verrai indirizzato alla seconda sfida...</h2>
+    </div>
 
     <!-- SECONDA SFIDA: Testo -->
     <div id="textChallenge" class="container">
@@ -164,9 +161,14 @@
         <button class="button" onclick="checkAnswer()">Invia</button>
     </div>
 
+    <!-- MESSAGGIO DI TRANSIZIONE SECONDA SFIDA -->
+    <div id="transition2" class="container">
+        <h2>Complimenti, hai superato la seconda sfida! Ora verrai indirizzato alla terza sfida...</h2>
+    </div>
+
     <!-- TERZA SFIDA: Lucchetto 254 -->
     <div id="lock2" class="container">
-        <h2>🔒 Inserisci il codice per sbloccare</h2>
+        <h2>🔒Inserisci il codice per sbloccare🔒</h2>
         <div class="lock">
             <div class="lock-shackle"></div>
             <div class="lock-body">
@@ -180,8 +182,16 @@
         <button class="button" onclick="checkCode(2, '254')">Sblocca</button>
     </div>
 
-    <!-- PAGINA FINALE -->
-    <div id="congrats" class="transition-message">🎉 COMPLIMENTI HAI COMPLETATO LE SFIDE! 🎉</div>
+    <!-- MESSAGGIO FINALE -->
+    <div id="congrats">
+        <h1>🎉COMPLIMENTI HAI COMPLETATO LE SFIDE!🎉</h1>
+    </div>
+
+    <!-- POPUP -->
+    <div id="popup" class="popup">
+        <p id="popup-text"></p>
+        <button class="button" onclick="closePopup()">OK</button>
+    </div>
 
     <script>
         let rotorValues = [0, 0, 0, 0, 0, 0];
@@ -198,21 +208,50 @@
                 : "" + rotorValues[3] + rotorValues[4] + rotorValues[5];
 
             if (code === correctCode) {
-                showTransition(lockNumber);
+                if (lockNumber === 1) {
+                    document.getElementById("lock1").classList.remove("visible");
+                    document.getElementById("transition1").classList.add("visible");
+
+                    setTimeout(function() {
+                        document.getElementById("transition1").classList.remove("visible");
+                        document.getElementById("textChallenge").classList.add("visible");
+                    }, 3500); // 3.5 secondi di attesa per la transizione
+                } else if (lockNumber === 2) {
+                    document.getElementById("lock2").classList.remove("visible");
+                    document.getElementById("transition2").classList.add("visible");
+
+                    setTimeout(function() {
+                        document.getElementById("transition2").classList.remove("visible");
+                        document.getElementById("congrats").style.display = "block";
+                    }, 3500); // 3.5 secondi di attesa per la transizione
+                }
+            } else {
+                showPopup("❌ Codice errato, riprova!");
             }
         }
 
         function checkAnswer() {
-            if (document.getElementById("answer").value.toLowerCase() === "cintura") {
-                showTransition(1.5);
+            let answer = document.getElementById("answer").value.toLowerCase();
+            if (answer === "cintura") {
+                document.getElementById("textChallenge").classList.remove("visible");
+                document.getElementById("transition2").classList.add("visible");
+
+                setTimeout(function() {
+                    document.getElementById("transition2").classList.remove("visible");
+                    document.getElementById("lock2").classList.add("visible");
+                }, 3500); // 3.5 secondi di attesa per la transizione
+            } else {
+                showPopup("❌ Risposta errata, riprova!");
             }
         }
 
-        function showTransition(step) {
-            document.querySelector(".visible").classList.remove("visible");
-            let transitionDiv = document.getElementById("transition" + step);
-            transitionDiv.style.display = "block";
-            setTimeout(() => { transitionDiv.style.display = "none"; document.getElementById(step === 1 ? "textChallenge" : "lock2").classList.add("visible"); }, 3500);
+        function showPopup(message) {
+            document.getElementById("popup-text").innerText = message;
+            document.getElementById("popup").style.display = "block";
+        }
+
+        function closePopup() {
+            document.getElementById("popup").style.display = "none";
         }
     </script>
 
