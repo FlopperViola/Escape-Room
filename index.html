@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucchetto della Prigione</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #808080;
+            margin: 0;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        /* Sfondi */
+        .container {
+            display: none;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .visible { display: block; }
+
+        /* Lucchetto */
+        .lock {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .lock-body {
+            width: 150px;
+            height: 120px;
+            background: #333;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            border: 5px solid #222;
+            position: relative;
+        }
+
+        .lock-shackle {
+            width: 60px;
+            height: 60px;
+            border: 5px solid #222;
+            border-top: none;
+            border-radius: 30px 30px 0 0;
+            position: absolute;
+            top: -50px;
+            background: transparent;
+        }
+
+        .rotors {
+            display: flex;
+            gap: 5px;
+        }
+
+        .rotor {
+            width: 40px;
+            height: 50px;
+            background: #222;
+            color: white;
+            font-size: 30px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .button:hover { background-color: #0056b3; }
+
+        /* Pop-up */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        /* Messaggio transizione */
+        #transition1, #transition2 {
+            font-size: 20px;
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        #congrats {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- PRIMA SFIDA: Lucchetto 963 -->
+    <div id="lock1" class="container visible">
+        <h2>🔒Inserisci il codice per sbloccare🔒</h2>
+        <div class="lock">
+            <div class="lock-shackle"></div>
+            <div class="lock-body">
+                <div class="rotors">
+                    <div class="rotor" onclick="rotateRotor(1)">0</div>
+                    <div class="rotor" onclick="rotateRotor(2)">0</div>
+                    <div class="rotor" onclick="rotateRotor(3)">0</div>
+                </div>
+            </div>
+        </div>
+        <button class="button" onclick="checkCode(1, '963')">Sblocca</button>
+    </div>
+
+    <!-- MESSAGGIO DI TRANSIZIONE PRIMA SFIDA -->
+    <div id="transition1" class="container">
+        <h2>Complimenti, hai superato la prima sfida! Ora verrai indirizzato alla seconda sfida...</h2>
+    </div>
+
+    <!-- SECONDA SFIDA: Testo -->
+    <div id="textChallenge" class="container">
+        <h2>INDICAMI L'OGGETTO RITROVATO</h2>
+        <input type="text" id="answer" placeholder="Scrivi qui...">
+        <button class="button" onclick="checkAnswer()">Invia</button>
+    </div>
+
+    <!-- MESSAGGIO DI TRANSIZIONE SECONDA SFIDA -->
+    <div id="transition2" class="container">
+        <h2>Complimenti, hai superato la seconda sfida! Ora verrai indirizzato alla terza sfida...</h2>
+    </div>
+
+    <!-- TERZA SFIDA: Lucchetto 254 -->
+    <div id="lock2" class="container">
+        <h2>🔒Inserisci il codice per sbloccare🔒</h2>
+        <div class="lock">
+            <div class="lock-shackle"></div>
+            <div class="lock-body">
+                <div class="rotors">
+                    <div class="rotor" onclick="rotateRotor(4)">0</div>
+                    <div class="rotor" onclick="rotateRotor(5)">0</div>
+                    <div class="rotor" onclick="rotateRotor(6)">0</div>
+                </div>
+            </div>
+        </div>
+        <button class="button" onclick="checkCode(2, '254')">Sblocca</button>
+    </div>
+
+    <!-- MESSAGGIO FINALE -->
+    <div id="congrats">
+        <h1>🎉COMPLIMENTI HAI COMPLETATO LE SFIDE!🎉</h1>
+    </div>
+
+    <!-- POPUP -->
+    <div id="popup" class="popup">
+        <p id="popup-text"></p>
+        <button class="button" onclick="closePopup()">OK</button>
+    </div>
+
+    <script>
+        let rotorValues = [0, 0, 0, 0, 0, 0];
+
+        function rotateRotor(index) {
+            let rotor = document.querySelectorAll(".rotor")[index - 1];
+            rotorValues[index - 1] = (rotorValues[index - 1] + 1) % 10;
+            rotor.innerText = rotorValues[index - 1];
+        }
+
+        function checkCode(lockNumber, correctCode) {
+            let code = lockNumber === 1
+                ? "" + rotorValues[0] + rotorValues[1] + rotorValues[2]
+                : "" + rotorValues[3] + rotorValues[4] + rotorValues[5];
+
+            if (code === correctCode) {
+                if (lockNumber === 1) {
+                    document.getElementById("lock1").classList.remove("visible");
+                    document.getElementById("transition1").classList.add("visible");
+
+                    setTimeout(function() {
+                        document.getElementById("transition1").classList.remove("visible");
+                        document.getElementById("textChallenge").classList.add("visible");
+                    }, 3500); // 3.5 secondi di attesa per la transizione
+                } else if (lockNumber === 2) {
+                    document.getElementById("lock2").classList.remove("visible");
+                    document.getElementById("transition2").classList.add("visible");
+
+                    setTimeout(function() {
+                        document.getElementById("transition2").classList.remove("visible");
+                        document.getElementById("congrats").style.display = "block";
+                    }, 3500); // 3.5 secondi di attesa per la transizione
+                }
+            } else {
+                showPopup("❌ Codice errato, riprova!");
+            }
+        }
+
+        function checkAnswer() {
+            let answer = document.getElementById("answer").value.toLowerCase();
+            if (answer === "cintura") {
+                document.getElementById("textChallenge").classList.remove("visible");
+                document.getElementById("transition2").classList.add("visible");
+
+                setTimeout(function() {
+                    document.getElementById("transition2").classList.remove("visible");
+                    document.getElementById("lock2").classList.add("visible");
+                }, 3500); // 3.5 secondi di attesa per la transizione
+            } else {
+                showPopup("❌ Risposta errata, riprova!");
+            }
+        }
+
+        function showPopup(message) {
+            document.getElementById("popup-text").innerText = message;
+            document.getElementById("popup").style.display = "block";
+        }
+
+        function closePopup() {
+            document.getElementById("popup").style.display = "none";
+        }
+    </script>
+
+</body>
+</html>
